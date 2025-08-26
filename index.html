@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>True Code/One's Complement/Two's Complement Calculator
+    </title>
+    <style>
+        body {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        input,
+        select {
+            font-size: 24px;
+            margin: 10px;
+        }
+
+        .output {
+            text-align: left;
+            margin-top: 20px;
+            font-size: 20px;
+            display: inline-block;
+        }
+
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+
+        td {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: center;
+        }
+        p{
+            font-size: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>True Code/One's Complement/Two's Complement Calculator
+    </h1>
+    <div>
+        <input type="number" id="inputNumber" placeholder="Enter an integer" oninput="calculate()" />
+        <select id="bitSelect" onchange="calculate()">
+            <option value="8" >8 bits</option>
+            <option value="16">16 bits</option>
+            <option value="32" selected>32 bits</option>
+            <option value="64">64 bits</option>
+        </select>
+    </div>
+
+    <div id="output" class="output">
+        <table>
+            <tr>
+                <td>True Code</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>One's Complement</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Two's Complement</td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <h2>Description</h2>
+<p>True Code: In the true code representation, the highest bit is the sign bit, where 1 indicates a negative number and 0 indicates a positive number. The remaining bits represent the value.</p>
+<p>One's Complement: In one's complement representation, the one's complement of a positive number is the number itself. For a negative number, the one's complement is obtained by keeping the sign bit unchanged and inverting the remaining bits.</p>
+<p>Two's Complement: In two's complement representation, the two's complement of a positive number is the number itself. For a negative number, the two's complement is obtained by keeping the sign bit unchanged, inverting the remaining bits, and then adding 1 (i.e., adding 1 to the one's complement).</p>
+<p>Bits Length：The number of binary bits for an integer determines the range of integer values that can be represented as [-2^(n-1), 2^(n-1) - 1], where n is the number of bits.</p>
+        </p>
+    </div>
+
+    <script>
+        function formatBinaryString(binaryString) {
+            return binaryString.match(/.{1,8}/g).join(' ');
+        }
+
+        function twoCompleNeg(num,bits) {
+            const reg = /1|0/g;
+            var binary = num.toString(2);
+            const babs = binary.substr(1); //除去符号位
+ 
+       
+            var twoC = babs.replace(reg, (x) => { return x === "0" ? "1" : "0" }); //取反
+            
+     
+            twoC=twoC.padStart(bits-1,'1');
+            const v = parseInt(twoC, 2);
+            num = v + 1; //加一
+            console.log(binary, num);
+            twoC = '1' + num.toString(2); //添加符号位
+            return twoC
+        }
+
+        function formatOriginalBinaryString(num) {
+
+        }
+
+        function reverse(v){
+            const reg = /1|0/g;
+            var twoC = v.replace(reg, (x) => { return x === "0" ? "1" : "0" }); //取反
+            return twoC;
+        }
+
+        function getBits(bf,bits){
+            const pv =  Math.pow(2, bits - 1);
+            const thV =  bf % pv;
+            console.log('bf',bf,' pv=',pv,', th=',thV);
+            return thV===0?'0'.repeat(bits-1): thV.toString(2).padStart(bits-1,'0');
+        }
+      
+
+
+        function formatNeg(num,bits){
+       
+            const numberBits = getBits(-num,bits);
+            console.log('numberBits',numberBits);
+
+            const first = '1'+ numberBits;
+
+            const secondBits = reverse(numberBits);
+            const second = '1'+ secondBits;
+            
+            const pv =  Math.pow(2, bits - 1);
+            const bf = parseInt(secondBits,2) + 1;
+            const thB = getBits(bf, bits);
+            const third = '1'+ thB;
+            
+            return [first,second, third];
+
+        }
+        
+
+        function formatZero(bits){
+            const v = '0'.repeat(bits);
+            return [v,v,v];
+        }
+
+        function formatPos(num,bits){
+            var binary = num.toString(2);
+            binary=binary.padStart(bits,'0');
+            return [binary,binary,binary];
+        }
+
+        function calculate() {
+            const number = parseInt(document.getElementById('inputNumber').value);
+            const bits = parseInt(document.getElementById('bitSelect').value);
+            const pv = Math.pow(2, bits - 1);
+            const max = pv-1;
+            const min = -pv ;
+
+            if (number < min || number > max) {
+                console.log('out of range', number, min, max);
+                document.getElementById('output').innerText = 'Number out of range!';
+                return;
+            }
+            
+            const v = number===0? formatZero(bits):(number>0?formatPos(number,bits):formatNeg(number,bits));
+
+            const original =formatBinaryString(  v[0]);
+            const complement = formatBinaryString(v[1]);
+            const inverse = formatBinaryString(v[2]);
+
+            document.getElementById('output').innerHTML = `
+                <table>
+                    <tr>
+                        <td>True Code</td>
+                        <td>${original}</td>
+                    </tr>
+                    <tr>
+                        <td>One's Complement</td>
+                        <td>${complement}</td>
+                    </tr>
+                    <tr>
+                        <td>Two's Complement</td>
+                        <td>${inverse}</td>
+                    </tr>
+                </table>
+            `;
+        }
+    </script>
+</body>
+
+</html>
